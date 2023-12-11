@@ -1,16 +1,15 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"os"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gosm",
+	Use: "gosm",
 }
 
 func Execute() {
