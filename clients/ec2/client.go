@@ -22,7 +22,6 @@ func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId st
 		filter := &[]types.Filter{}
 		err := json.Unmarshal([]byte(tags), &filter)
 		if err != nil {
-			log.Println(tags)
 			log.Fatal("Error unmarshaling JSON: ", err)
 		}
 		input.Filters = *filter
