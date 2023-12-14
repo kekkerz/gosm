@@ -37,6 +37,6 @@ func SendCommand(cfg aws.Config, targets []string, command string) {
 			}
 			ch <- aws.ToString(waitResp.StandardOutputContent)
 		}(instance)
-		log.Printf("%s: %s", instance, <-ch)
+		log.Printf("\033[32m%s: \n\033[0m%s\n", instance, <-ch)
 	}
 }
