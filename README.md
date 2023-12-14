@@ -22,7 +22,6 @@ Flags:
 ```
 
 ## Next steps
-- Add support for sending commands to multiple instances
 - Add ability to use StartSession to get a shell on an instance
     - Would prefer to implement natively using the SDK's `StartSession` method, rather than calling the aws cli.
 - Add unit tests

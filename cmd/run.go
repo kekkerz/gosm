@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -15,7 +12,8 @@ import (
 
 var Name string
 var Command string
-var Profile string
+var Tags string
+var InstanceId string
 
 var runCmd = &cobra.Command{
 	Use: "run",
@@ -33,9 +31,15 @@ var runCmd = &cobra.Command{
 			err = nil
 		}
 
-		instances := ec2.GetInstanceMetaData(cfg, Name)
-		resp := ssm.SendCommand(cfg, instances[0], Command)
-		log.Print(aws.ToString(resp))
+		reservations := ec2.GetInstanceMetaData(cfg, Name, Tags, InstanceId)
+		var targets []string
+		for _, reservation := range reservations {
+			for _, instance := range reservation.Instances {
+				targets = append(targets, aws.ToString(instance.InstanceId))
+			}
+		}
+
+		ssm.SendCommand(cfg, targets, Command)
 	},
 }
 
@@ -43,8 +47,11 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().StringVarP(&Name, "name", "n", "", "Name of EC2 instance")
+	// Potentially convert `tags` to use a custom flag that only accepts a JSON blob
+	runCmd.Flags().StringVarP(&Tags, "tags", "t", "", "List of tags to match against. E.g. `'[{\"Name\": \"tag:Name\", \"Values\": [\"instance1\", \"instance2\"]}]'`")
+	runCmd.Flags().StringVarP(&InstanceId, "instance-id", "i", "", "Target Instance ID")
 	runCmd.Flags().StringVarP(&Command, "command", "c", "", "Command to send to instance")
-	runCmd.Flags().StringVarP(&Profile, "profile", "p", "", "AWS profile")
-	runCmd.MarkFlagRequired("name")
+	runCmd.MarkFlagsMutuallyExclusive("name", "tags", "instance-id")
+	runCmd.MarkFlagsOneRequired("name", "tags", "instance-id")
 	runCmd.MarkFlagRequired("command")
 }
