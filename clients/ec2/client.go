@@ -9,11 +9,6 @@ import (
 	"log"
 )
 
-/*type Tags []struct {
-	Name string `json:"Name"`
-	Values []string `json:"Values"`
-}*/
-
 func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId string) (instance []types.Instance) {
 	input := &ec2.DescribeInstancesInput{}
 	if name != "" {
@@ -24,7 +19,6 @@ func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId st
 			},
 		}
 	} else if tags != "" {
-		//jsonTags := &Tags{}
 		filter := &[]types.Filter{}
 		err := json.Unmarshal([]byte(tags), &filter)
 		if err != nil {
@@ -37,14 +31,6 @@ func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId st
 	}
 
 	client := ec2.NewFromConfig(cfg)
-	/*output, err := client.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{
-		Filters: []types.Filter{
-			{
-				Name:   aws.String("tag:Name"),
-				Values: []string{name},
-			},
-		},
-	})*/
 	output, err := client.DescribeInstances(context.TODO(), input)
 	if err != nil {
 		log.Fatal(err)
