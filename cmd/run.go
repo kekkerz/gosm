@@ -34,8 +34,9 @@ var runCmd = &cobra.Command{
 		reservations := ec2.GetInstanceMetaData(cfg, Name, Tags, InstanceId)
 		var targets []string
 		for _, reservation := range reservations {
-			// Fix this later. Don't assume one instance per reservation
-			targets = append(targets, aws.ToString(reservation.Instances[0].InstanceId))
+			for _, instance := range reservation.Instances {
+				targets = append(targets, aws.ToString(instance.InstanceId))
+			}
 		}
 
 		ssm.SendCommand(cfg, targets, Command)
