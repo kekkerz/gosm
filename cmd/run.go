@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -15,7 +12,8 @@ import (
 
 var Name string
 var Command string
-var Profile string
+var Tags string
+var InstanceId string
 
 var runCmd = &cobra.Command{
 	Use: "run",
@@ -33,7 +31,7 @@ var runCmd = &cobra.Command{
 			err = nil
 		}
 
-		instances := ec2.GetInstanceMetaData(cfg, Name)
+		instances := ec2.GetInstanceMetaData(cfg, Name, Tags, InstanceId)
 		resp := ssm.SendCommand(cfg, instances[0], Command)
 		log.Print(aws.ToString(resp))
 	},
@@ -43,8 +41,10 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().StringVarP(&Name, "name", "n", "", "Name of EC2 instance")
+	runCmd.Flags().StringVarP(&Tags, "tags", "t", "", "List of tags to match against")
+	runCmd.Flags().StringVarP(&InstanceId, "instance-id", "i", "", "Target Instance ID")
 	runCmd.Flags().StringVarP(&Command, "command", "c", "", "Command to send to instance")
-	runCmd.Flags().StringVarP(&Profile, "profile", "p", "", "AWS profile")
-	runCmd.MarkFlagRequired("name")
+	runCmd.MarkFlagsMutuallyExclusive("name", "tags", "instance-id")
+	runCmd.MarkFlagsOneRequired("name", "tags", "instance-id")
 	runCmd.MarkFlagRequired("command")
 }
