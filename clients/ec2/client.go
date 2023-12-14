@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId string) (instance []types.Instance) {
+func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId string) (instance []types.Reservation) {
 	input := &ec2.DescribeInstancesInput{}
 	if name != "" {
 		input.Filters = []types.Filter{
@@ -35,5 +35,5 @@ func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId st
 		log.Fatal(err)
 	}
 
-	return output.Reservations[0].Instances
+	return output.Reservations
 }

@@ -31,9 +31,14 @@ var runCmd = &cobra.Command{
 			err = nil
 		}
 
-		instances := ec2.GetInstanceMetaData(cfg, Name, Tags, InstanceId)
-		resp := ssm.SendCommand(cfg, instances[0], Command)
-		log.Print(aws.ToString(resp))
+		reservations := ec2.GetInstanceMetaData(cfg, Name, Tags, InstanceId)
+		var targets []string
+		for _, reservation := range reservations {
+			// Fix this later. Don't assume one instance per reservation
+			targets = append(targets, aws.ToString(reservation.Instances[0].InstanceId))
+		}
+
+		ssm.SendCommand(cfg, targets, Command)
 	},
 }
 
@@ -41,7 +46,8 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().StringVarP(&Name, "name", "n", "", "Name of EC2 instance")
-	runCmd.Flags().StringVarP(&Tags, "tags", "t", "", "List of tags to match against")
+	// Potentially convert `tags` to use a custom flag that only accepts a JSON blob
+	runCmd.Flags().StringVarP(&Tags, "tags", "t", "", "List of tags to match against. E.g. `'[{\"Name\": \"tag:Name\", \"Values\": [\"instance1\", \"instance2\"]}]'`")
 	runCmd.Flags().StringVarP(&InstanceId, "instance-id", "i", "", "Target Instance ID")
 	runCmd.Flags().StringVarP(&Command, "command", "c", "", "Command to send to instance")
 	runCmd.MarkFlagsMutuallyExclusive("name", "tags", "instance-id")
