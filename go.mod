@@ -36,6 +36,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
+	// https://github.com/aws/session-manager-plugin/issues/73
+	// session-manager-plugin is importing deprecated uuid package
+	// this version is used as a workaround
 	github.com/twinj/uuid v0.0.0-20151029044442-89173bcdda19 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
