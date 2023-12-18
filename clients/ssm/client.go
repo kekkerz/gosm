@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/session-manager-plugin/src/datachannel"
-	sl "github.com/aws/session-manager-plugin/src/log"
+	ssmLog "github.com/aws/session-manager-plugin/src/log"
 	"github.com/aws/session-manager-plugin/src/sessionmanagerplugin/session"
 	_ "github.com/aws/session-manager-plugin/src/sessionmanagerplugin/session/shellsession"
 	"github.com/google/uuid"
@@ -69,5 +69,5 @@ func Connect(cfg aws.Config, target string) {
 	ssmSession.TargetId = target
 	ssmSession.Endpoint = fmt.Sprintf("ssm.%s.amazonaws.com", cfg.Region)
 
-	ssmSession.Execute(sl.Logger(true, target))
+	ssmSession.Execute(ssmLog.Logger(true, target))
 }
