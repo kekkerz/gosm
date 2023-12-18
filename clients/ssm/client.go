@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"log"
 	"time"
+	"fmt"
 )
 
 func SendCommand(cfg aws.Config, targets []string, command string) {
@@ -50,7 +51,6 @@ func SendCommand(cfg aws.Config, targets []string, command string) {
 }
 
 func Connect(cfg aws.Config, target string) {
-	var ssmSession session.Session
 	client := ssm.NewFromConfig(cfg)
 	resp, err := client.StartSession(context.TODO(), &ssm.StartSessionInput{
 		Target: aws.String(target),
@@ -60,13 +60,14 @@ func Connect(cfg aws.Config, target string) {
 		log.Fatal(err)
 	}
 
+	var ssmSession session.Session
 	ssmSession.SessionId = *resp.SessionId
 	ssmSession.StreamUrl = *resp.StreamUrl
 	ssmSession.TokenValue = *resp.TokenValue
 	ssmSession.ClientId = uuid.New().String()
 	ssmSession.DataChannel = &datachannel.DataChannel{}
 	ssmSession.TargetId = target
-	ssmSession.Endpoint = "ssm.us-east-2.amazonaws.com"
+	ssmSession.Endpoint = fmt.Sprintf("ssm.%s.amazonaws.com", cfg.Region)
 
 	ssmSession.Execute(sl.Logger(true, target))
 }
