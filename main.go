@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gosm/cmd"
+	"github.com/kekkerz/gosm/cmd"
 )
 
 func main() {
