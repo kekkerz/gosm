@@ -9,24 +9,30 @@ import (
 	"log"
 )
 
-func GetInstanceMetaData(cfg aws.Config, name string, tags string, instanceId string) (instance []types.Reservation) {
+type FilterOptions struct {
+	Name       string
+	Tags       string
+	InstanceId string
+}
+
+func GetInstanceMetaData(cfg aws.Config, filters FilterOptions) (instance []types.Reservation) {
 	input := &ec2.DescribeInstancesInput{}
-	if name != "" {
+	if filters.Name != "" {
 		input.Filters = []types.Filter{
 			{
 				Name:   aws.String("tag:Name"),
-				Values: []string{name},
+				Values: []string{filters.Name},
 			},
 		}
-	} else if tags != "" {
+	} else if filters.Tags != "" {
 		filter := &[]types.Filter{}
-		err := json.Unmarshal([]byte(tags), &filter)
+		err := json.Unmarshal([]byte(filters.Tags), &filter)
 		if err != nil {
 			log.Fatal("Error unmarshaling JSON: ", err)
 		}
 		input.Filters = *filter
-	} else if instanceId != "" {
-		input.InstanceIds = []string{instanceId}
+	} else if filters.InstanceId != "" {
+		input.InstanceIds = []string{filters.InstanceId}
 	}
 
 	client := ec2.NewFromConfig(cfg)

@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/spf13/cobra"
 	"github.com/kekkerz/gosm/clients/ec2"
 	"github.com/kekkerz/gosm/clients/ssm"
+	"github.com/spf13/cobra"
 	"log"
 	"os"
 )
@@ -46,7 +46,12 @@ func init() {
 	var runCmd = &cobra.Command{
 		Use: "run",
 		Run: func(cmd *cobra.Command, args []string) {
-			reservations := ec2.GetInstanceMetaData(cfg, Name, Tags, InstanceId)
+			filters := ec2.FilterOptions{
+				Name:       Name,
+				Tags:       Tags,
+				InstanceId: InstanceId,
+			}
+			reservations := ec2.GetInstanceMetaData(cfg, filters)
 			var targets []string
 			for _, reservation := range reservations {
 				for _, instance := range reservation.Instances {
@@ -61,8 +66,13 @@ func init() {
 		Use: "connect",
 		Run: func(cmd *cobra.Command, args []string) {
 			var target string
+			filters := ec2.FilterOptions{
+				Name:       Name,
+				Tags:       Tags,
+				InstanceId: InstanceId,
+			}
 			if Name != "" {
-				reservations := ec2.GetInstanceMetaData(cfg, Name, "", InstanceId)
+				reservations := ec2.GetInstanceMetaData(cfg, filters)
 				if len(reservations) > 1 || len(reservations[0].Instances) > 1 {
 					log.Fatal("More than one instance found.")
 				}
