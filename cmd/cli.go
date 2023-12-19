@@ -12,13 +12,13 @@ import (
 )
 
 var (
-	Profile string
-	Name string
-	Command string
-	Tags string
+	Profile    string
+	Name       string
+	Command    string
+	Tags       string
 	InstanceId string
-	cfg aws.Config
-	err error
+	cfg        aws.Config
+	err        error
 )
 
 var rootCmd = &cobra.Command{
