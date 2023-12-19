@@ -61,13 +61,13 @@ func Connect(cfg aws.Config, target string) {
 	}
 
 	var ssmSession = session.Session{
-		SessionId: *resp.SessionId,
-		StreamUrl: *resp.StreamUrl,
-		TokenValue: *resp.TokenValue,
-		ClientId: uuid.New().String(),
+		SessionId:   *resp.SessionId,
+		StreamUrl:   *resp.StreamUrl,
+		TokenValue:  *resp.TokenValue,
+		ClientId:    uuid.New().String(),
 		DataChannel: &datachannel.DataChannel{},
-		TargetId: target,
-		Endpoint: fmt.Sprintf("ssm.%s.amazonaws.com", cfg.Region),
+		TargetId:    target,
+		Endpoint:    fmt.Sprintf("ssm.%s.amazonaws.com", cfg.Region),
 	}
 
 	err = ssmSession.Execute(ssmLog.Logger(true, target))
