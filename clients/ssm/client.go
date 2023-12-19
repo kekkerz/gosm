@@ -69,5 +69,9 @@ func Connect(cfg aws.Config, target string) {
 	ssmSession.TargetId = target
 	ssmSession.Endpoint = fmt.Sprintf("ssm.%s.amazonaws.com", cfg.Region)
 
-	ssmSession.Execute(ssmLog.Logger(true, target))
+	err = ssmSession.Execute(ssmLog.Logger(true, target))
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
