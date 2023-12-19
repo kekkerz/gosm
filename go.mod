@@ -1,4 +1,4 @@
-module gosm
+module github.com/kekkerz/gosm
 
 go 1.21.4
 

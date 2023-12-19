@@ -5,8 +5,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/spf13/cobra"
-	"gosm/clients/ec2"
-	"gosm/clients/ssm"
+	"github.com/kekkerz/gosm/clients/ec2"
+	"github.com/kekkerz/gosm/clients/ssm"
 	"log"
 	"os"
 )
