@@ -60,14 +60,15 @@ func Connect(cfg aws.Config, target string) {
 		log.Fatal(err)
 	}
 
-	var ssmSession session.Session
-	ssmSession.SessionId = *resp.SessionId
-	ssmSession.StreamUrl = *resp.StreamUrl
-	ssmSession.TokenValue = *resp.TokenValue
-	ssmSession.ClientId = uuid.New().String()
-	ssmSession.DataChannel = &datachannel.DataChannel{}
-	ssmSession.TargetId = target
-	ssmSession.Endpoint = fmt.Sprintf("ssm.%s.amazonaws.com", cfg.Region)
+	var ssmSession = session.Session{
+		SessionId: *resp.SessionId,
+		StreamUrl: *resp.StreamUrl,
+		TokenValue: *resp.TokenValue,
+		ClientId: uuid.New().String(),
+		DataChannel: &datachannel.DataChannel{},
+		TargetId: target,
+		Endpoint: fmt.Sprintf("ssm.%s.amazonaws.com", cfg.Region),
+	}
 
 	err = ssmSession.Execute(ssmLog.Logger(true, target))
 
