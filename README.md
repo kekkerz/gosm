@@ -92,4 +92,3 @@ Global Flags:
 ## Next steps
 - Update `--tags` flag to only accept JSON compliant strings
 - Add unit tests
-- Add GitHub actions to provided release artifacts
