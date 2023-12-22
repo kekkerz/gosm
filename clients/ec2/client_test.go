@@ -1,7 +1,6 @@
 package ec2
 
 import (
-	"testing"
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -9,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"reflect"
 	"strconv"
+	"testing"
 )
 
 type mockDescribeInstancesAPI func(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
@@ -19,9 +19,9 @@ func (m mockDescribeInstancesAPI) DescribeInstances(ctx context.Context, params 
 
 func TestDescribeInstances(t *testing.T) {
 	cases := []struct {
-		client func(t *testing.T) EC2DescribeInstancesAPI
+		client  func(t *testing.T) EC2DescribeInstancesAPI
 		filters FilterOptions
-		expect []types.Reservation
+		expect  []types.Reservation
 	}{
 		{
 			client: func(t *testing.T) EC2DescribeInstancesAPI {
