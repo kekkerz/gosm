@@ -39,7 +39,6 @@ func GetInstanceMetaData(client EC2DescribeInstancesAPI, filters FilterOptions) 
 		input.InstanceIds = []string{filters.InstanceId}
 	}
 
-	//client := ec2.NewFromConfig(cfg)
 	output, err := client.DescribeInstances(context.TODO(), input)
 	if err != nil {
 		log.Fatal(err)
