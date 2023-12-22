@@ -15,7 +15,11 @@ type FilterOptions struct {
 	InstanceId string
 }
 
-func GetInstanceMetaData(cfg aws.Config, filters FilterOptions) (instance []types.Reservation) {
+type EC2DescribeInstancesAPI interface {
+	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
+}
+
+func GetInstanceMetaData(client EC2DescribeInstancesAPI, filters FilterOptions) (instance []types.Reservation) {
 	input := &ec2.DescribeInstancesInput{}
 	if filters.Name != "" {
 		input.Filters = []types.Filter{
@@ -35,7 +39,6 @@ func GetInstanceMetaData(cfg aws.Config, filters FilterOptions) (instance []type
 		input.InstanceIds = []string{filters.InstanceId}
 	}
 
-	client := ec2.NewFromConfig(cfg)
 	output, err := client.DescribeInstances(context.TODO(), input)
 	if err != nil {
 		log.Fatal(err)
