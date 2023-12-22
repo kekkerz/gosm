@@ -1,0 +1,17 @@
+---
+name: Unit Tests
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  test:
+    name: Release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests
+        run: go test github.com/kekkerz/gosm/...
