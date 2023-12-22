@@ -10,8 +10,14 @@ on:
 
 jobs:
   test:
-    name: Release artifacts
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - name: Run tests
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - 
+        name: Run tests
         run: go test github.com/kekkerz/gosm/...
