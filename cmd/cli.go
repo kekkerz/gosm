@@ -20,10 +20,52 @@ var (
 	InstanceId string
 	cfg        aws.Config
 	err        error
+	ec2Client  *e.Client
 )
 
 var rootCmd = &cobra.Command{
 	Use: "gosm",
+}
+
+var runCmd = &cobra.Command{
+	Use: "run",
+	Run: func(cmd *cobra.Command, args []string) {
+		filters := ec2.FilterOptions{
+			Name:       Name,
+			Tags:       Tags,
+			InstanceId: InstanceId,
+		}
+		reservations := ec2.GetInstanceMetaData(ec2Client, filters)
+		var targets []string
+		for _, reservation := range reservations {
+			for _, instance := range reservation.Instances {
+				targets = append(targets, aws.ToString(instance.InstanceId))
+			}
+		}
+		ssm.SendCommand(cfg, targets, Command)
+	},
+}
+
+var connectCmd = &cobra.Command{
+	Use: "connect",
+	Run: func(cmd *cobra.Command, args []string) {
+		var target string
+		filters := ec2.FilterOptions{
+			Name:       Name,
+			Tags:       Tags,
+			InstanceId: InstanceId,
+		}
+		if Name != "" {
+			reservations := ec2.GetInstanceMetaData(ec2Client, filters)
+			if len(reservations) > 1 || len(reservations[0].Instances) > 1 {
+				log.Fatal("More than one instance found.")
+			}
+			target = aws.ToString(reservations[0].Instances[0].InstanceId)
+		} else {
+			target = InstanceId
+		}
+		ssm.Connect(cfg, target)
+	},
 }
 
 func Execute() {
@@ -34,58 +76,7 @@ func Execute() {
 }
 
 func init() {
-	if Profile != "" {
-		cfg, err = config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(Profile))
-	} else {
-		cfg, err = config.LoadDefaultConfig(context.TODO())
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ec2Client := e.NewFromConfig(cfg)
-
-	var runCmd = &cobra.Command{
-		Use: "run",
-		Run: func(cmd *cobra.Command, args []string) {
-			filters := ec2.FilterOptions{
-				Name:       Name,
-				Tags:       Tags,
-				InstanceId: InstanceId,
-			}
-			reservations := ec2.GetInstanceMetaData(ec2Client, filters)
-			var targets []string
-			for _, reservation := range reservations {
-				for _, instance := range reservation.Instances {
-					targets = append(targets, aws.ToString(instance.InstanceId))
-				}
-			}
-			ssm.SendCommand(cfg, targets, Command)
-		},
-	}
-
-	var connectCmd = &cobra.Command{
-		Use: "connect",
-		Run: func(cmd *cobra.Command, args []string) {
-			var target string
-			filters := ec2.FilterOptions{
-				Name:       Name,
-				Tags:       Tags,
-				InstanceId: InstanceId,
-			}
-			if Name != "" {
-				reservations := ec2.GetInstanceMetaData(ec2Client, filters)
-				if len(reservations) > 1 || len(reservations[0].Instances) > 1 {
-					log.Fatal("More than one instance found.")
-				}
-				target = aws.ToString(reservations[0].Instances[0].InstanceId)
-			} else {
-				target = InstanceId
-			}
-			ssm.Connect(cfg, target)
-		},
-	}
+	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVarP(&Profile, "profile", "p", "", "AWS profile")
 	rootCmd.AddCommand(runCmd)
@@ -104,4 +95,18 @@ func init() {
 	connectCmd.Flags().StringVarP(&InstanceId, "instance-id", "i", "", "Target Instance ID")
 	connectCmd.MarkFlagsMutuallyExclusive("name", "instance-id")
 	connectCmd.MarkFlagsOneRequired("name", "instance-id")
+}
+
+func initConfig() {
+	if Profile != "" {
+		cfg, err = config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(Profile))
+	} else {
+		cfg, err = config.LoadDefaultConfig(context.TODO())
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ec2Client = e.NewFromConfig(cfg)
 }
