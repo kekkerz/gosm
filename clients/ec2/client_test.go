@@ -2,13 +2,13 @@ package ec2
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 type mockDescribeInstancesAPI func(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
@@ -31,7 +31,7 @@ func TestDescribeInstances(t *testing.T) {
 						t.Fatal("expect filters to not be nil")
 					}
 
-					if e, a := "bitwarden", params.Filters[0].Values[0]; e != a {
+					if e, a := "instanceA", params.Filters[0].Values[0]; e != a {
 						t.Errorf("expect %v, got %v", e, a)
 					}
 
@@ -49,7 +49,7 @@ func TestDescribeInstances(t *testing.T) {
 				})
 			},
 			filters: FilterOptions{
-				Name: "bitwarden",
+				Name: "instanceA",
 			},
 			expect: []types.Reservation{
 				{
@@ -107,13 +107,14 @@ func TestDescribeInstances(t *testing.T) {
 						t.Fatal("expect filters to not be nil")
 					}
 
-					e := &[]types.Filter{}
-					err := json.Unmarshal([]byte(`[{"Name": "tag:Name", "Values": ["bitwarden", "tailscale"]}]`), &e)
-					if err != nil {
-						t.Fatal("Error unmarshaling JSON: ", err)
+					e := []types.Filter{
+						{
+							Name:   aws.String("tag:Name"),
+							Values: []string{"instanceA", "instanceB"},
+						},
 					}
 
-					if a := params.Filters; reflect.DeepEqual(e, a) {
+					if a := params.Filters; !reflect.DeepEqual(e, a) {
 						t.Errorf("expect %v, got %v", e, a)
 					}
 
@@ -131,7 +132,12 @@ func TestDescribeInstances(t *testing.T) {
 				})
 			},
 			filters: FilterOptions{
-				Tags: `[{"Name": "tag:Name", "Values": ["bitwarden", "tailscale"]}]`,
+				Tags: []types.Filter{
+					{
+						Name:   aws.String("tag:Name"),
+						Values: []string{"instanceA", "instanceB"},
+					},
+				},
 			},
 			expect: []types.Reservation{
 				{

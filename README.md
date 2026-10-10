@@ -13,7 +13,7 @@ ip-172-0-143-106.us-east-2.compute.internal
 2023/12/14 17:57:52 i-xxxxxxxx: 
 ip-172-0-143-106.us-east-2.compute.internal
 
-[abevil@epsilon ~/git/gosm]$ ./gosm run -t '[{"Name": "tag:Name", "Values": ["instance-name", "instance2-name"]}]' -c "hostname"
+[abevil@epsilon ~/git/gosm]$ ./gosm run -t '["instance-name", "instance2-name"]' -c "hostname"
 2023/12/14 17:56:49 i-xxxxxxxx: 
 ip-172-0-143-106.us-east-2.compute.internal
 
@@ -22,18 +22,10 @@ ip-172-0-132-40.us-east-2.compute.internal
 ```
 
 #### Tag targeting
-Tags are passed in using the `-t`/`--tags` flag as a JSON blob. The format should be as follows:
+Tags are passed in using the `-t`/`--tags` flag as an array. The format should be as follows:
 
 ```
-[
-  {
-    "Name": "tag:<name-of-tag>",
-    "Values": [
-      "<tag_value>",
-      "<tag_value>"
-    ]
-  }
-]
+'["<tag_value>", "<tag_value>"]'
 ```
 
 ### Connect
@@ -57,17 +49,16 @@ Additional tags can be supplied by simply adding a new {} block at the top level
 ## Usage
 ### Run
 ```
-[abevil@epsilon ~/git/gosm]$ ./gosm run help
-Error: required flag(s) "command" not set
+[abevil@epsilon ~/git/gosm]$ ./gosm run --help
 Usage:
   gosm run [flags]
 
 Flags:
-  -c, --command string                                                        Command to send to instance
-  -h, --help                                                                  help for run
-  -i, --instance-id string                                                    Target Instance ID
-  -n, --name string                                                           Name of EC2 instance
-  -t, --tags '[{"Name": "tag:Name", "Values": ["instance1", "instance2"]}]'   List of tags to match against. E.g. '[{"Name": "tag:Name", "Values": ["instance1", "instance2"]}]'
+  -c, --command string                      Command to send to instance
+  -h, --help                                help for run
+  -i, --instance-id string                  Target Instance ID
+  -n, --name string                         Name of EC2 instance
+  -t, --tags '["instance1", "instance2"]'   List of tags to match against. E.g. '["instance1", "instance2"]' (default [])
 
 Global Flags:
   -p, --profile string   AWS profile
@@ -76,7 +67,6 @@ Global Flags:
 ### Connect
 ```
 [abevil@epsilon ~/git/gosm]$ ./gosm connect help
-Error: at least one of the flags in the group [name instance-id] is required
 Usage:
   gosm connect [flags]
 
@@ -88,7 +78,3 @@ Flags:
 Global Flags:
   -p, --profile string   AWS profile
 ```
-
-## Next steps
-- Update `--tags` flag to only accept JSON compliant strings
-- Add unit tests
