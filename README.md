@@ -88,7 +88,3 @@ Flags:
 Global Flags:
   -p, --profile string   AWS profile
 ```
-
-## Next steps
-- Update `--tags` flag to only accept JSON compliant strings
-- Add unit tests
