@@ -2,21 +2,55 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log"
+	"os"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	e "github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/kekkerz/gosm/clients/ec2"
 	"github.com/kekkerz/gosm/clients/ssm"
 	"github.com/spf13/cobra"
-	"log"
-	"os"
 )
+
+// Tags implementation of pflags.Value for custom validation of flag
+//
+//	type Value interface {
+//		String() string
+//		Set(string) error
+//		Type() string
+//	}
+type Tags []types.Filter
+
+// default value
+func (t *Tags) String() string {
+	return "[]"
+}
+
+// Set unmarshals input into Tags type
+// Returns error if wrong format
+func (t *Tags) Set(v string) error {
+	if err := json.Unmarshal([]byte(fmt.Sprintf("[{\"Name\": \"tag:Name\", \"Values\": %s}]", v)), &t); err != nil {
+		return errors.New("input does not match expected format")
+	}
+
+	return nil
+}
+
+// Type returns type name for var
+func (t *Tags) Type() string {
+	return "Tags"
+}
 
 var (
 	Profile    string
 	Name       string
 	Command    string
-	Tags       string
+	tagsVal    Tags
 	InstanceId string
 	cfg        aws.Config
 	err        error
@@ -32,7 +66,7 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filters := ec2.FilterOptions{
 			Name:       Name,
-			Tags:       Tags,
+			Tags:       tagsVal,
 			InstanceId: InstanceId,
 		}
 		reservations := ec2.GetInstanceMetaData(ec2Client, filters)
@@ -52,7 +86,7 @@ var connectCmd = &cobra.Command{
 		var target string
 		filters := ec2.FilterOptions{
 			Name:       Name,
-			Tags:       Tags,
+			Tags:       tagsVal,
 			InstanceId: InstanceId,
 		}
 		if Name != "" {
@@ -83,8 +117,7 @@ func init() {
 	rootCmd.AddCommand(connectCmd)
 
 	runCmd.Flags().StringVarP(&Name, "name", "n", "", "Name of EC2 instance")
-	// Potentially convert `tags` to use a custom flag that only accepts a JSON blob
-	runCmd.Flags().StringVarP(&Tags, "tags", "t", "", "List of tags to match against. E.g. `'[{\"Name\": \"tag:Name\", \"Values\": [\"instance1\", \"instance2\"]}]'`")
+	runCmd.Flags().VarP(&tagsVal, "tags", "t", "List of tags to match against. E.g. `'[\"instance1\", \"instance2\"]'`")
 	runCmd.Flags().StringVarP(&InstanceId, "instance-id", "i", "", "Target Instance ID")
 	runCmd.Flags().StringVarP(&Command, "command", "c", "", "Command to send to instance")
 	runCmd.MarkFlagsMutuallyExclusive("name", "tags", "instance-id")
